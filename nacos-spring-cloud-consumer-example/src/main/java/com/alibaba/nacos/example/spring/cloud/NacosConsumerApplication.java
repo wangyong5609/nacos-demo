@@ -1,10 +1,12 @@
 package com.alibaba.nacos.example.spring.cloud;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,11 +30,14 @@ public class NacosConsumerApplication {
     public static void main(String[] args) {
         SpringApplication.run(NacosConsumerApplication.class, args);
     }
-
+    @RefreshScope
     @RestController
     public class TestController {
 
         private final RestTemplate restTemplate;
+        
+        @Value("${user.name}")
+        private String userName;
 
         @Autowired
         public TestController(RestTemplate restTemplate) {this.restTemplate = restTemplate;}
@@ -40,6 +45,11 @@ public class NacosConsumerApplication {
         @RequestMapping(value = "/echo/{str}", method = RequestMethod.GET)
         public String echo(@PathVariable String str) {
             return restTemplate.getForObject("http://service-provider/echo/" + str, String.class);
+        }
+
+        @RequestMapping(value = "/config", method = RequestMethod.GET)
+        public String refreshConfiguration() {
+            return userName;
         }
     }
 }
