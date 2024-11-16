@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
@@ -19,6 +20,7 @@ import org.springframework.web.client.RestTemplate;
  */
 @SpringBootApplication
 @EnableDiscoveryClient
+@EnableConfigurationProperties(MyAppProperties.class)
 public class NacosConsumerApplication {
 
     @LoadBalanced
@@ -35,9 +37,9 @@ public class NacosConsumerApplication {
     public class TestController {
 
         private final RestTemplate restTemplate;
-        
-        @Value("${user.name}")
-        private String userName;
+
+        @Autowired
+        private MyAppProperties user;
 
         @Autowired
         public TestController(RestTemplate restTemplate) {this.restTemplate = restTemplate;}
@@ -49,7 +51,7 @@ public class NacosConsumerApplication {
 
         @RequestMapping(value = "/config", method = RequestMethod.GET)
         public String refreshConfiguration() {
-            return userName;
+            return user.getName();
         }
     }
 }
